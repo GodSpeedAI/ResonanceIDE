@@ -51,15 +51,17 @@ jobs:
 
       - name: Install extension dependencies
         run: |
-          # Install dependencies for extensions that need them
-          for dir in extensions/*/; do
-            if [ -f "$dir/package.json" ]; then
-              (cd "$dir" && npm install --ignore-scripts --no-audit --no-fund 2>/dev/null || true)
-            fi
+          # Install dependencies for all extensions and their subdirectories
+          find extensions -name "package.json" -not -path "*/node_modules/*" | while read pkg; do
+            dir=$(dirname "$pkg")
+            echo "Installing dependencies in $dir"
+            (cd "$dir" && npm install --ignore-scripts --no-audit --no-fund 2>/dev/null || true)
           done
           # Install .vscode extension dependencies
-          cd .vscode/extensions/vscode-selfhost-test-provider && npm install --ignore-scripts || true
-          cd ../vscode-selfhost-import-aid && npm install --ignore-scripts || true
+          if [ -d ".vscode/extensions/vscode-selfhost-test-provider" ]; then
+            cd .vscode/extensions/vscode-selfhost-test-provider && npm install --ignore-scripts || true
+            cd ../vscode-selfhost-import-aid && npm install --ignore-scripts || true
+          fi
 
       - name: Type check /build/ scripts
         run: npm run typecheck
