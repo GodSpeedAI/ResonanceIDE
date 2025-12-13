@@ -1,8 +1,8 @@
-#!/usr/bin/env node
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 'use strict';
 
 /**
@@ -214,42 +214,44 @@ function main() {
 	const help = args.includes('--help') || args.includes('-h');
 
 	if (help) {
-		console.log(`
-ResonanceIDE Product Configuration Validator
-
-Usage:
-  node scripts/validate-product-config.js [options]
-
-Options:
-  --verbose, -v      Show detailed output including all checked fields
-  --strict           Treat warnings as errors
-  --all-platforms    Check required fields for all platforms, not just current
-  --help, -h         Show this help message
-
-Environment:
-  VSCODE_PRODUCT_JSON  Path to product overlay file (e.g., build/ResonanceIDE.product.json)
-
-Example:
-  VSCODE_PRODUCT_JSON=build/ResonanceIDE.product.json node scripts/validate-product-config.js
-`);
+		console.log([
+			'',
+			'ResonanceIDE Product Configuration Validator',
+			'',
+			'Usage:',
+			'  node scripts/validate-product-config.js [options]',
+			'',
+			'Options:',
+			'  --verbose, -v      Show detailed output including all checked fields',
+			'  --strict           Treat warnings as errors',
+			'  --all-platforms    Check required fields for all platforms, not just current',
+			'  --help, -h         Show this help message',
+			'',
+			'Environment:',
+			'  VSCODE_PRODUCT_JSON  Path to product overlay file (e.g., build/ResonanceIDE.product.json)',
+			'',
+			'Example:',
+			'  VSCODE_PRODUCT_JSON=build/ResonanceIDE.product.json node scripts/validate-product-config.js',
+			''
+		].join('\n'));
 		process.exit(0);
 	}
 
-	console.log('🔍 Validating product configuration...\n');
+	console.log('[validate] Validating product configuration...\n');
 
 	// Check if running with ResonanceIDE overlay
 	const overlayPath = process.env['VSCODE_PRODUCT_JSON'];
 	if (overlayPath) {
-		console.log(`📄 Using overlay: ${overlayPath}`);
+		console.log(`[validate] Using overlay: ${overlayPath}`);
 	} else {
-		console.log('📄 Using base product.json (no VSCODE_PRODUCT_JSON set)');
+		console.log('[validate] Using base product.json (no VSCODE_PRODUCT_JSON set)');
 	}
 
 	let product;
 	try {
 		product = getProductConfiguration();
 	} catch (err) {
-		console.error(`\n❌ Failed to load product configuration: ${err.message}`);
+		console.error(`\n[error] Failed to load product configuration: ${err.message}`);
 		process.exit(1);
 	}
 
@@ -266,7 +268,7 @@ Example:
 
 	// Print warnings
 	if (warnings.length > 0) {
-		console.log('\n⚠️  Warnings:');
+		console.log('\n[warn] Warnings:');
 		for (const warning of warnings) {
 			console.log(`   - ${warning}`);
 		}
@@ -274,7 +276,7 @@ Example:
 
 	// Print errors
 	if (errors.length > 0) {
-		console.log('\n❌ Errors:');
+		console.log('\n[error] Errors:');
 		for (const error of errors) {
 			console.log(`   - ${error}`);
 		}
@@ -287,16 +289,16 @@ Example:
 
 	console.log('');
 	if (hasErrors || treatWarningsAsErrors) {
-		console.log(`❌ Validation FAILED: ${errors.length} error(s), ${warnings.length} warning(s)`);
-		console.log('\n💡 To fix:');
+		console.log(`[fail] Validation FAILED: ${errors.length} error(s), ${warnings.length} warning(s)`);
+		console.log('\n[hint] To fix:');
 		console.log('   1. Ensure build/ResonanceIDE.product.json has all required fields');
 		console.log('   2. Run: VSCODE_PRODUCT_JSON=build/ResonanceIDE.product.json node scripts/validate-product-config.js');
 		process.exit(1);
 	} else if (hasWarnings) {
-		console.log(`✅ Validation PASSED with ${warnings.length} warning(s)`);
+		console.log(`[pass] Validation PASSED with ${warnings.length} warning(s)`);
 		process.exit(0);
 	} else {
-		console.log('✅ Validation PASSED');
+		console.log('[pass] Validation PASSED');
 		process.exit(0);
 	}
 }
