@@ -86,7 +86,7 @@ jobs:
         run: npm run test-node
 
       - name: Publish Log Files
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         continue-on-error: true
         with:
