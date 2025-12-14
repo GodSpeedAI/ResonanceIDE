@@ -17,7 +17,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Use larger runner for more memory (16GB instead of 7GB)
+    runs-on: ubuntu-latest-16-cores
+    timeout-minutes: 60
     env:
       NPM_ARCH: x64
       VSCODE_ARCH: x64
@@ -78,7 +80,7 @@ jobs:
           export VSCODE_PRODUCT_JSON=build/ResonanceIDE.product.json
           npm run gulp -- vscode-linux-x64-min
         env:
-          NODE_OPTIONS: --max-old-space-size=8192
+          NODE_OPTIONS: --max-old-space-size=12288
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload build artifact
