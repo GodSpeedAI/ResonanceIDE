@@ -36,15 +36,13 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: |
-          npm install -g yarn
-          yarn install --frozen-lockfile
+        run: npm ci
         env:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
 
       - name: Download Electron
-        run: yarn electron
+        run: npx electron-download
 
       - name: Validate ResonanceIDE config
         run: npm run validate:resonance
@@ -52,7 +50,7 @@ jobs:
       - name: Build ResonanceIDE
         run: |
           export VSCODE_PRODUCT_JSON=build/ResonanceIDE.product.json
-          yarn gulp vscode-linux-x64-min
+          npm run gulp -- vscode-linux-x64-min
         env:
           NODE_OPTIONS: --max-old-space-size=8192
 
