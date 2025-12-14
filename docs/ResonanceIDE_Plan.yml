@@ -426,7 +426,7 @@ phases:
             - Keybinding editor
 
           REMOVAL CANDIDATES:
-            - Walkthroughs / welcome page modules
+            - Walkthroughs / welcome page modules (let's redesign these)
             - Remote tunneling / dev containers (MS-specific)
             - Live Share
             - Notebooks (unless needed for AI features)
