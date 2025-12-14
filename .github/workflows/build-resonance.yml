@@ -19,7 +19,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      PLATFORM: ${{ inputs.platform || 'linux' }}
+      NPM_ARCH: x64
+      VSCODE_ARCH: x64
 
     steps:
       - name: Checkout
@@ -29,23 +30,48 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
+          cache: 'npm'
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          set -e
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            build-essential \
+            pkg-config \
+            libgtk-3-0 \
+            libxkbfile-dev \
+            libx11-dev \
+            libx11-xcb-dev \
+            libkrb5-dev \
+            libsecret-1-dev \
+            libgbm1 \
+            libnotify-bin
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci --ignore-scripts || npm ci --ignore-scripts
+          (cd build && npm ci)
+          node build/npm/postinstall.ts
         env:
-          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          npm_config_arch: ${{ env.NPM_ARCH }}
+          VSCODE_ARCH: ${{ env.VSCODE_ARCH }}
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
-
-      - name: Download Electron
-        run: npx electron-download
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate ResonanceIDE config
         run: npm run validate:resonance
+
+      - name: Download Electron
+        run: node build/lib/electron.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build ResonanceIDE
         run: |
@@ -53,6 +79,7 @@ jobs:
           npm run gulp -- vscode-linux-x64-min
         env:
           NODE_OPTIONS: --max-old-space-size=8192
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
