@@ -48,6 +48,13 @@
 	"aiConfig": null,
 	"crashReporter": null,
 	"updateUrl": null,
-	"experimentsUrl": null
+	"experimentsUrl": null,
+
+	"enableTelemetry": false,
+	"sendASmile": null,
+	"configurationSync": null,
+	"serviceMachineIdKey": null,
+	"telemetryEndpointUrl": null,
+	"enabledTelemetryLevels": { "error": false, "crash": false, "usage": false }
 }
 

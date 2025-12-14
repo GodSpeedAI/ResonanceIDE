@@ -296,7 +296,7 @@ phases:
   # ---------------------------------------------------------------------------
   - id: phase-2-telemetry-removal
     name: Remove/Disable Telemetry, Experiments, MS Cloud Hooks
-    status: not_started
+    status: completed
     estimated_effort: "4-6 hours"
     depends_on:
       - phase-1-product-identity
@@ -304,7 +304,7 @@ phases:
     tasks:
       - id: disable-runtime-telemetry
         goal: Disable telemetry at config and code levels
-        status: not_started
+        status: completed
         instructions: |
           1. In product.json (ResonanceIDE variant):
              - Remove or unset telemetry endpoints
@@ -330,7 +330,7 @@ phases:
 
       - id: remove-experiments
         goal: Disable remote experiment/A/B testing fetches
-        status: not_started
+        status: completed
         instructions: |
           1. Search for experiment-related code:
              grep -r "experiments" src/vs/
@@ -348,7 +348,7 @@ phases:
 
       - id: disable-ms-signin-services
         goal: Remove MS accounts, GitHub auth, Azure, tunnels, Settings Sync
-        status: not_started
+        status: completed
         instructions: |
           1. Identify MS service extensions in extensions/:
              - azure-*
@@ -380,7 +380,7 @@ phases:
 
       - id: verify-no-ms-network-traffic
         goal: Confirm zero MS telemetry/experiments/auth calls on idle
-        status: not_started
+        status: completed
         instructions: |
           1. Run ResonanceIDE with network proxy/sniffer (e.g., mitmproxy, Wireshark)
 

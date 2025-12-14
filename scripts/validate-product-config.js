@@ -62,6 +62,13 @@ const SHOULD_BE_DISABLED = [
 	'crashReporter',
 	'aiConfig',
 	'experimentsUrl',
+	'updateUrl',
+	'defaultChatAgent',
+	'trustedExtensionAuthAccess',
+	'sendASmile',
+	'configurationSync',
+	'serviceMachineIdKey',
+	'telemetryEndpointUrl',
 ];
 
 // Fields that are recommended but not strictly required
@@ -185,6 +192,11 @@ function validate(product, options = {}) {
 		if (product[field] !== undefined && product[field] !== null) {
 			warnings.push(`Field ${field} should be null or removed for ResonanceIDE (currently: ${typeof product[field]})`);
 		}
+	}
+
+	// Check enableTelemetry is explicitly false (critical for supportsTelemetry() to return false)
+	if (product.enableTelemetry !== false) {
+		warnings.push(`enableTelemetry should be explicitly set to false (currently: ${product.enableTelemetry})`);
 	}
 
 	// Check for MS branding that should be removed
