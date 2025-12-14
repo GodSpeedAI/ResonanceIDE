@@ -44,6 +44,7 @@ import { KeyCode } from '../../../base/common/keyCodes.js';
 import { ACTIVITY_BAR_BADGE_BACKGROUND, ACTIVITY_BAR_BADGE_FOREGROUND } from '../../common/theme.js';
 import { IBaseActionViewItemOptions } from '../../../base/browser/ui/actionbar/actionViewItems.js';
 import { ICommandService } from '../../../platform/commands/common/commands.js';
+import { isResonanceIDE } from '../../../base/common/resonanceProduct.js';
 
 export class GlobalCompositeBar extends Disposable {
 
@@ -64,6 +65,7 @@ export class GlobalCompositeBar extends Disposable {
 		@IInstantiationService private readonly instantiationService: IInstantiationService,
 		@IStorageService private readonly storageService: IStorageService,
 		@IExtensionService private readonly extensionService: IExtensionService,
+		@IProductService private readonly productService: IProductService,
 	) {
 		super();
 
@@ -147,7 +149,7 @@ export class GlobalCompositeBar extends Disposable {
 	}
 
 	private get accountsVisibilityPreference(): boolean {
-		return isAccountsActionVisible(this.storageService);
+		return isAccountsActionVisible(this.storageService, this.productService);
 	}
 
 	private set accountsVisibilityPreference(value: boolean) {
@@ -741,7 +743,11 @@ function simpleActivityContextMenuActions(storageService: IStorageService, isAcc
 	];
 }
 
-export function isAccountsActionVisible(storageService: IStorageService): boolean {
+export function isAccountsActionVisible(storageService: IStorageService, productService?: IProductService): boolean {
+	// ResonanceIDE: Always hide Accounts icon
+	if (productService && isResonanceIDE(productService)) {
+		return false;
+	}
 	return storageService.getBoolean(AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY, StorageScope.PROFILE, true);
 }
 
