@@ -75,13 +75,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Configure Swap
+        run: |
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          echo "Swap added:"
+          free -h
+
       - name: Build ResonanceIDE
         run: |
           export VSCODE_PRODUCT_JSON=build/ResonanceIDE.product.json
           npm run gulp -- vscode-linux-x64-min
         env:
-          # Limit to 6GB to fit in 7GB runner (aggressive GC)
-          NODE_OPTIONS: --max-old-space-size=6144
+          # Limit to 4GB to force GC and use swap for the rest
+          NODE_OPTIONS: --max-old-space-size=4096
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload build artifact
