@@ -401,7 +401,7 @@ phases:
   # ---------------------------------------------------------------------------
   - id: phase-3-feature-stripping
     name: Minimize to Core Features While Preserving Extension Compatibility
-    status: not_started
+    status: completed
     estimated_effort: "4-8 hours"
     depends_on:
       - phase-2-telemetry-removal
@@ -409,7 +409,7 @@ phases:
     tasks:
       - id: define-core-feature-set
         goal: Document explicit must-keep and removal-candidate features
-        status: not_started
+        status: completed
         instructions: |
           MUST KEEP:
             - File explorer
@@ -439,7 +439,7 @@ phases:
 
       - id: remove-nonessential-builtins
         goal: Remove or disable non-essential built-in extensions
-        status: not_started
+        status: completed
         instructions: |
           1. Audit extensions/ directory
 
@@ -468,7 +468,7 @@ phases:
 
       - id: hide-unused-ui-surfaces
         goal: Simplify UI by hiding removed feature surfaces
-        status: not_started
+        status: completed
         instructions: |
           1. Locate activity bar contributions in:
              src/vs/workbench/browser/
@@ -493,7 +493,7 @@ phases:
 
       - id: confirm-extension-compatibility
         goal: Verify third-party extensions work correctly
-        status: not_started
+        status: completed
         instructions: |
           1. Install test extensions from Open VSX:
              - A language server extension (e.g., Python, pyright)
@@ -545,7 +545,7 @@ phases:
              - Splash screens
         success_criteria:
           - Complete inventory of all branding references
-          - List of assets requiring replacement
+          - List of assets requiring replacement (prompt for me to replace these)
 
       - id: replace-branding-assets
         goal: Swap VS Code branding with ResonanceIDE assets
