@@ -56,24 +56,15 @@ jobs:
         run: |
           npm ci --ignore-scripts || npm ci --ignore-scripts
           cd build && npm ci
+          # Run postinstall manually to install extension dependencies
+          # (required because we use --ignore-scripts above)
+          node build/npm/postinstall.ts
         env:
           npm_config_arch: ${{ env.NPM_ARCH }}
           VSCODE_ARCH: ${{ env.VSCODE_ARCH }}
           ELECTRON_SKIP_BINARY_DOWNLOAD: 1
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install extension dependencies
-        run: |
-          find extensions -name "package.json" -not -path "*/node_modules/*" | while read pkg; do
-            dir=$(dirname "$pkg")
-            echo "Installing dependencies in $dir"
-            (cd "$dir" && npm install --ignore-scripts --no-audit --no-fund 2>/dev/null || true)
-          done
-          if [ -d ".vscode/extensions/vscode-selfhost-test-provider" ]; then
-            cd .vscode/extensions/vscode-selfhost-test-provider && npm install --ignore-scripts || true
-            cd ../vscode-selfhost-import-aid && npm install --ignore-scripts || true
-          fi
 
       - name: Compile
         run: npm run compile
