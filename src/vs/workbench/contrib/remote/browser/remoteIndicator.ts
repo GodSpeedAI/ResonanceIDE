@@ -55,6 +55,7 @@ import Severity from '../../../../base/common/severity.js';
 import { isCancellationError } from '../../../../base/common/errors.js';
 import { toErrorMessage } from '../../../../base/common/errorMessage.js';
 import { ILifecycleService } from '../../../services/lifecycle/common/lifecycle.js';
+import { isResonanceIDE } from '../../../../base/common/resonanceProduct.js';
 
 type ActionGroup = [string, Array<MenuItemAction | SubmenuItemAction>];
 
@@ -162,6 +163,15 @@ export class RemoteStatusIndicator extends Disposable implements IWorkbenchContr
 		@IConfigurationService private readonly configurationService: IConfigurationService,
 	) {
 		super();
+
+		// ResonanceIDE: Skip remote indicator initialization
+		// This hides the remote status indicator without breaking extension compatibility
+		if (isResonanceIDE(this.productService)) {
+			this.unrestrictedRemoteIndicatorMenu = this._register(this.menuService.createMenu(MenuId.StatusBarWindowIndicatorMenu, this.contextKeyService));
+			this.remoteIndicatorMenu = this._register(this.menuService.createMenu(MenuId.StatusBarRemoteIndicatorMenu, this.contextKeyService));
+			this.connectionStateContextKey = new RawContextKey<'' | 'initializing' | 'disconnected' | 'connected'>('remoteConnectionState', '').bindTo(this.contextKeyService);
+			return; // Do not show remote status indicator for ResonanceIDE
+		}
 
 		this.unrestrictedRemoteIndicatorMenu = this._register(this.menuService.createMenu(MenuId.StatusBarWindowIndicatorMenu, this.contextKeyService)); // to be removed once migration completed
 		this.remoteIndicatorMenu = this._register(this.menuService.createMenu(MenuId.StatusBarRemoteIndicatorMenu, this.contextKeyService));

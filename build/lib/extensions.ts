@@ -26,6 +26,7 @@ import { type IExtensionDefinition, getExtensionStream } from './builtInExtensio
 import { getVersion } from './getVersion.ts';
 import { fetchUrls, fetchGithub } from './fetch.ts';
 import vzip from 'gulp-vinyl-zip';
+import { getProductConfiguration } from './productConfig.ts';
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -335,9 +336,13 @@ const marketplaceWebExtensionsExclude = new Set([
 	'ms-vscode.vscode-js-profile-table'
 ]);
 
-const productJson = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, '../../product.json'), 'utf8'));
-const builtInExtensions: IExtensionDefinition[] = productJson.builtInExtensions || [];
-const webBuiltInExtensions: IExtensionDefinition[] = productJson.webBuiltInExtensions || [];
+const productJson = getProductConfiguration(root) as Record<string, unknown>;
+const builtInExtensions: IExtensionDefinition[] = (productJson.builtInExtensions as IExtensionDefinition[]) || [];
+const webBuiltInExtensions: IExtensionDefinition[] = (productJson.webBuiltInExtensions as IExtensionDefinition[]) || [];
+// ResonanceIDE-specific: Extensions to exclude from local packaging (e.g., microsoft-authentication, github)
+const productExcludedExtensions: string[] = (productJson.excludedLocalExtensions as string[]) || [];
+// Combined set of all excluded extensions (default + product-specific)
+const allExcludedExtensions = new Set([...excludedExtensions, ...productExcludedExtensions]);
 
 type ExtensionKind = 'ui' | 'workspace' | 'web';
 interface IExtensionManifest {
@@ -427,7 +432,7 @@ function doPackageLocalExtensionsStream(forWeb: boolean, disableMangle: boolean,
 				return { name: extensionName, path: extensionPath, manifestPath: absoluteManifestPath };
 			})
 			.filter(({ name }) => native ? nativeExtensionsSet.has(name) : !nativeExtensionsSet.has(name))
-			.filter(({ name }) => excludedExtensions.indexOf(name) === -1)
+			.filter(({ name }) => !allExcludedExtensions.has(name))
 			.filter(({ name }) => builtInExtensions.every(b => b.name !== name))
 			.filter(({ manifestPath }) => (forWeb ? isWebExtension(require(manifestPath)) : true))
 	);

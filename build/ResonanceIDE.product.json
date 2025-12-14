@@ -37,6 +37,13 @@
 	"builtInExtensions": [],
 	"webBuiltInExtensions": [],
 
+	"excludedLocalExtensions": [
+		"microsoft-authentication",
+		"github-authentication",
+		"github",
+		"tunnel-forwarding"
+	],
+
 	"reportIssueUrl": "https://github.com/GodSpeedAI/ResonanceIDE/issues/new",
 
 	"serverLicenseUrl": "https://github.com/GodSpeedAI/ResonanceIDE/blob/main/LICENSE.txt",
