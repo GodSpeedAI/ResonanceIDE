@@ -45,6 +45,13 @@
 	],
 
 	"reportIssueUrl": "https://github.com/GodSpeedAI/ResonanceIDE/issues/new",
+	"documentationUrl": "https://github.com/GodSpeedAI/ResonanceIDE/wiki",
+	"releaseNotesUrl": "https://github.com/GodSpeedAI/ResonanceIDE/releases",
+	"keyboardShortcutsUrlMac": "https://github.com/GodSpeedAI/ResonanceIDE/wiki/Keyboard-Shortcuts-Mac",
+	"keyboardShortcutsUrlLinux": "https://github.com/GodSpeedAI/ResonanceIDE/wiki/Keyboard-Shortcuts-Linux",
+	"keyboardShortcutsUrlWin": "https://github.com/GodSpeedAI/ResonanceIDE/wiki/Keyboard-Shortcuts-Windows",
+	"tipsAndTricksUrl": "https://github.com/GodSpeedAI/ResonanceIDE/wiki/Tips-and-Tricks",
+	"introductoryVideosUrl": null,
 
 	"serverLicenseUrl": "https://github.com/GodSpeedAI/ResonanceIDE/blob/main/LICENSE.txt",
 	"webviewContentExternalBaseUrlTemplate": null,

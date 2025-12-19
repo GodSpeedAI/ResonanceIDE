@@ -1,0 +1,176 @@
+name: Build ResonanceIDE
+
+on:
+  # Manual trigger from Actions tab
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Build platform'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - linux
+          - win32
+  # Auto-build on version tags
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-linux:
+    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'linux' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NPM_ARCH: x64
+      VSCODE_ARCH: x64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          set -e
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            build-essential \
+            pkg-config \
+            libgtk-3-0 \
+            libxkbfile-dev \
+            libx11-dev \
+            libx11-xcb-dev \
+            libkrb5-dev \
+            libsecret-1-dev \
+            libgbm1 \
+            libnotify-bin
+
+      - name: Install dependencies
+        run: |
+          npm ci --ignore-scripts || npm ci --ignore-scripts
+          (cd build && npm ci)
+          node build/npm/postinstall.ts
+        env:
+          npm_config_arch: ${{ env.NPM_ARCH }}
+          VSCODE_ARCH: ${{ env.VSCODE_ARCH }}
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Validate ResonanceIDE config
+        run: npm run validate:resonance
+
+      - name: Download Electron
+        run: npm run electron
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Swap
+        run: |
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+          echo "Swap added:"
+          free -h
+
+      - name: Build ResonanceIDE
+        run: |
+          export VSCODE_PRODUCT_JSON=build/ResonanceIDE.product.json
+          npm run gulp -- vscode-linux-x64-min
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prep artifact for upload
+        run: mv ../VSCode-linux-x64 ./ResonanceIDE-linux-x64
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ResonanceIDE-linux-x64
+          path: ResonanceIDE-linux-x64
+          if-no-files-found: warn
+          retention-days: 7
+
+  build-windows:
+    if: ${{ github.event_name == 'push' || inputs.platform == 'all' || inputs.platform == 'win32' }}
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      NPM_ARCH: x64
+      VSCODE_ARCH: x64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          npm ci --ignore-scripts
+          cd build
+          npm ci
+          cd ..
+          node build/npm/postinstall.ts
+        env:
+          npm_config_arch: ${{ env.NPM_ARCH }}
+          VSCODE_ARCH: ${{ env.VSCODE_ARCH }}
+          ELECTRON_SKIP_BINARY_DOWNLOAD: 1
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+
+      - name: Validate ResonanceIDE config
+        run: node scripts/validate-product-config.js --all-platforms
+        env:
+          VSCODE_PRODUCT_JSON: build/ResonanceIDE.product.json
+
+      - name: Download Electron
+        run: npm run electron
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build ResonanceIDE
+        run: |
+          $env:VSCODE_PRODUCT_JSON = "build/ResonanceIDE.product.json"
+          npm run gulp -- vscode-win32-x64-min
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+
+      - name: Prep artifact for upload
+        run: Move-Item -Path ..\VSCode-win32-x64 -Destination .\ResonanceIDE-win32-x64
+        shell: pwsh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ResonanceIDE-win32-x64
+          path: ResonanceIDE-win32-x64
+          if-no-files-found: warn
+          retention-days: 7
